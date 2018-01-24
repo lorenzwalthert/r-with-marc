@@ -1,0 +1,111 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+flights
+```
+
+```{r}
+nrow(flights)
+```
+
+We only want to see flights from american airways:
+```{r}
+american_airways_with_delay <- filter(flights, (carrier == "AA") & (dep_delay > 0))
+
+table(american_airways_with_delay$year)
+
+ggplot(american_airways_with_delay, aes(x = time_hour, y = dep_delay)) +
+  geom_point(alpha = 0.1, color = "red") + scale_y_log10(name = "Departure Delay in Minutes") + 
+  ggtitle("Delays over the year") + 
+  labs(x = "Time") + geom_smooth()
+
+american_airways_with_delay %>%
+  mutate(more_than_10_mins_delay = dep_delay > 10) %>%
+  group_by(month) %>%
+  summarise(
+    share_of_delayed_fligths = mean(more_than_10_mins_delay),
+    maximum_delay = max(dep_delay)
+  )
+```
+
+
+```{r}
+aggregated <- flights %>%
+  filter(!(is.na(dep_delay))) %>%
+  mutate(more_than_10_mins_delay = dep_delay > 10) %>%
+  group_by(carrier) %>%
+  summarise(
+    share_of_delayed_fligths = mean(more_than_10_mins_delay),
+    maximum_delay = max(dep_delay), 
+    number_of_flights = n()
+  ) %>%
+  arrange(desc(share_of_delayed_fligths))
+
+a <- "number_of_flights"
+ggplot(aggregated, aes(x = number_of_flights)) + geom_histogram(bins = 10)
+#  table(flights$dep_delay, exclude = NULL)
+```
+
+```{r}
+american_airways_with_delay %>%
+  filter((carrier == "AA") & (dep_delay > 0))
+```
+
+
+Es gibt verschiedene Typen von daten in R
+```{r}
+c(1, 2, 3)
+c(1, "a")
+list(1, list(2))
+letters
+data.frame(a = 1:10, b = letters[1:10], c = "")
+table(c(1, 2, 1, 1, 2))
+```
+
+
+Conditions
+```{r}
+1 == 2
+1 > 2
+1 >= 2
+1 < 2
+```
+
+
+
+
+```{r}
+add_one <- function(x) {
+  x + 1
+}
+add_y <- function(x, y) {
+  x  + y
+}
+
+add_y(1, 3)
+add_one(4)
+
+
+create_plot <- function(data, variable_to_plot) {
+  ggplot(data, aes_string(x = variable_to_plot)) + geom_histogram(bins = 10)
+}
+
+create_plot(flights, "arr_time")
+```
+
+```{r}
+my_files <- list.files()
+for (file in my_files) {
+  print(my_files)
+}
+```
+
