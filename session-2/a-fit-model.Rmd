@@ -1,0 +1,53 @@
+---
+title: "Chapter 2 - MNIST"
+output: html_notebook
+---
+
+
+```{r}
+# install.packages("keras")
+library(keras)
+mnist <- dataset_mnist()
+class(mnist)
+str(mnist)
+```
+
+Configuring the model:
+```{r}
+base <- keras_model_sequential() %>%
+  layer_dense(units = 512, activation = "relu", input_shape = c(28^2)) %>%
+  layer_dense(units = 10, activation = "softmax")
+
+base %>%
+  compile(
+  optimizer = "rmsprop",
+  loss = "categorical_crossentropy", # loss_categorical_crossentropy,
+  metrics = c("accuracy")
+)
+
+base
+```
+
+Preparing the data
+
+```{r}
+
+training_images <- array_reshape(mnist$train$x, c(60000, 28 * 28))
+dim(mnist$test$x)
+training_images <- training_images / 255
+training_labels <- to_categorical(mnist$train$y)
+test_images <- array_reshape(mnist$test$x, c(10000, 28 * 28))
+test_images <- test_images / 255
+test_labels <- to_categorical(mnist$test$y)
+```
+
+```{r}
+history <- base %>%
+  fit(training_images, training_labels, epochs = 4, validation_data = list(test_images, test_labels))
+```
+
+```{r}
+base %>%
+  evaluate(test_images[1:10, ], test_labels[1:10,])
+```
+
